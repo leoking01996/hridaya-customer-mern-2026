@@ -31,10 +31,10 @@ user_id:number;
 }
 
 function Profile() {
-const [userData, setUserData] = useState<UserData | null>(null);
 const [isEditClicked,setIsEditClicked]=useState(false);
 const [preview, setPreview] = useState<string>("");
-const [paymentHistory,setPaymentHistory]=useState<transactionHistory[]>([]);
+const [userData, setUserData] = useState<UserData | null>(null);
+const [paymentHistory, setPaymentHistory] = useState<transactionHistory[]>([]);
 const [formData,setFormData]=useState<UserData>({
     full_name: "",
     email: "",
@@ -78,63 +78,68 @@ const [formData,setFormData]=useState<UserData>({
 // }, []);
 
 useEffect(() => {
-  transaction_history();
-
   const stored = sessionStorage.getItem("user");
 
-  if (stored) {
-    const parsed = JSON.parse(stored);
+  if (!stored) return;
 
-    console.log(parsed);
+  const parsed = JSON.parse(stored);
 
-    setUserData({
-      id: parsed._id || "",
-      full_name: parsed.full_name || "",
-      email: parsed.email || "",
-      phone_no: parsed.phone || "",
-      date_of_birth: parsed.date_of_birth || "",
-      profile_pic: parsed.profilePic || "",
-      address: parsed.address || "",
-    });
-  }
+  console.log("Session User:", parsed);
+
+  const user: UserData = {
+    id: parsed.id || parsed._id || "",
+    full_name: parsed.full_name || "",
+    email: parsed.email || "",
+    phone_no: parsed.phone || "",
+    date_of_birth: parsed.date_of_birth || "",
+    profile_pic: parsed.profilePic || "",
+    address: parsed.address || "",
+  };
+
+  setUserData(user);
 }, []);
 
 
 useEffect(() => {
+  if (!userData?.id) return;
+
+  transaction_history(userData.id);
+}, [userData?.id]);
 
 
-  transaction_history();
-}, [userData]);
+const transaction_history = async (userId: string) => {
+  try {
+    console.log("Fetching orders for user:", userId);
 
-// const transaction_history =async ()=>{
-//                 const token = sessionStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
-//   const res = await fetch("https://hridaya-customer-backend-production.up.railway.app/api/auth/orders", {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-//                 const data = await res.json(); 
-//                 const transaction_list =  data.data.filter((list: { user_id: string; })=>list.user_id == userData?.id)
-//               //  console.log(data.data.filter(list=>list.user_id == userData.id),"asdasdsadsad")
-//       setPaymentHistory(transaction_list);
-// }
-const transaction_history = async () => {
-  const token = sessionStorage.getItem("token");
+    const res = await fetch(
+      "https://hridaya-customer-backend-production.up.railway.app/api/auth/orders",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  const res = await fetch("https://hridaya-customer-backend-production.up.railway.app/api/auth/orders", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+    const data = await res.json();
 
-  const data = await res.json();
+    if (!data.success) return;
 
-  if (data.success) {
-               const transaction_list =  data.data.filter((list: { user_id: string; })=>list.user_id == userData?.id)
-               console.log(transaction_list,"asdasdsadsad")
-      setPaymentHistory(transaction_list);
+    console.log("All Orders:", data.data);
+
+    const transaction_list = data.data.filter(
+      (order: any) => order.user_id === userId
+    );
+
+    console.log("Filtered Orders:", transaction_list);
+
+    setPaymentHistory(transaction_list);
+  } catch (err) {
+    console.error(err);
   }
+  console.log("userData:", userData);
+console.log("paymentHistory:", paymentHistory);
 };
 
 const edit =()=>{

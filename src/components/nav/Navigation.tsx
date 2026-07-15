@@ -55,10 +55,11 @@ const Navigation = () => {
         if (!userData) return;
         const userId = JSON.parse(userData).id;
         const res = await fetch(
-          `http://localhost/backend_php_hridaya/hridaya-admin-backend/addToCart/get_cart.php?user_id=${userId}`
+          `https://hridaya-customer-backend-production.up.railway.app/api/auth/getCartList/${userId}`
         );
         const data = await res.json();
-        setCartListNo(data.cart.length);
+        console.log(data,'555555555555555');
+        setCartListNo(data.data.length);
       } catch (error) {
         console.error("Error fetching cart:", error);
       }

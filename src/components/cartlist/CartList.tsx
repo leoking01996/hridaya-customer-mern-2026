@@ -76,14 +76,14 @@ toast.success(data.message);
 };
   useEffect(() => {
     fetchCart();
-    get_transaction_history();
+    // get_transaction_history();
   }, []);
-const get_transaction_history = async ()=>{
-  const res  = await fetch('http://localhost/backend_php_hridaya/transaction_history.php');
-  const data = await res.json();
-  console.log(data.data,'trmsaction data')
-  setTransactions(data.data);
-}
+// const get_transaction_history = async ()=>{
+//   const res  = await fetch('http://localhost/backend_php_hridaya/transaction_history.php');
+//   const data = await res.json();
+//   console.log(data.data,'trmsaction data')
+//   setTransactions(data.data);
+// }
 
 const getStatus = (cartId: number) => {
   const match = transactions.find(
